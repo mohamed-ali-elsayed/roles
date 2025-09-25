@@ -14,10 +14,12 @@ Passwords are stored securely using **Ansible Vault**.
 
 ## Usage
 
-1. Encrypt your variables file:
+Encrypt your variables file:
+
   ansible-vault encrypt MariaDB-setup-role/vars/main.yml
 
 Store your vault password in a hidden file (example ~/.hidden_file).
 
 Run the playbook with:
+
   ansible-playbook -i inventory/hosts.ini playbook.yml --vault-password-file ~/.hidden_file
