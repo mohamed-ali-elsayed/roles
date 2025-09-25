@@ -1,0 +1,4 @@
+#use ansible-vault to encrypt this file with the command "ansible-vault encrypt vars/main.yml" 
+user1_password: user1secure
+user2_password: user2secure
+mariadb_root_password: rootsecure
