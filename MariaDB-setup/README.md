@@ -18,10 +18,11 @@ Encrypt your variables file:
 
 ```bash
   ansible-vault encrypt MariaDB-setup-role/vars/main.yml
-
+```
 Store your vault password in a hidden file (example ~/.hidden_file).
 
 Run the playbook with:
 
 ```bash
   ansible-playbook -i inventory/hosts.ini playbook.yml --vault-password-file ~/.hidden_file
+```
