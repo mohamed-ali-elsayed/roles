@@ -1,0 +1,56 @@
+---
+# Install firewall package depending on OS
+- name: "installing firewall daemon on RedHat"
+  yum:
+    name: "{{ redhat_pkg }}"
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "installing firewall daemon on Debian"
+  apt:
+    name: "{{ debian_pkg }}"
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+
+# Start and enable firewall service
+- name: "starting and enabling firewall on RedHat"
+  service:
+    name: "{{ redhat_pkg }}"
+    state: started
+    enabled: yes
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "starting and enabling firewall on Debian"
+  service:
+    name: "{{ debian_pkg }}"
+    state: started
+    enabled: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+# Open TCP port 2222
+- name: "open tcp port 2222 permanently on RHEL"
+  firewalld:
+    port: 2222/tcp
+    permanent: yes
+    state: enabled
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "open tcp port 2222 on Debian"
+  ufw:
+    port: 2222
+    proto: tcp
+    rule: allow
+  when: ansible_facts['os_family'] == "Debian"
+
+# Restart firewall service
+- name: "restarting firewall on RedHat"
+  service:
+    name: "{{ redhat_pkg }}"
+    state: restarted
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "restarting firewall on Debian"
+  service:
+    name: "{{ debian_pkg }}"
+    state: restarted
+  when: ansible_facts['os_family'] == "Debian"

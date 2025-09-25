@@ -1,0 +1,60 @@
+---
+- name: "installing apache on redhat based systems"
+  yum:
+    name: "{{ redhat_pkg }}"
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+  
+- name: "installing apache on debian based systems"
+  apt:
+    name: "{{ debian_pkg }}"
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+  
+- name: "starting and enabling the apache on boot for redhat based systems"
+  service:
+    name: "{{ redhat_pkg }}"
+    state: started
+    enabled: yes
+  when: ansible_facts['os_family'] == "RedHat"
+  
+- name: "starting and enabling the apache on boot for debian based systems"
+  service:
+    name: "{{ debian_pkg }}"
+    state: started
+    enabled: yes
+  when: ansible_facts['os_family'] == "Debian"
+  
+- name: "copuing index.html file to the Document Root with the appropriate owner, group and permissions on redhat"
+  copy:
+    src: index.html
+    dest: "/var/www/html/index.html"
+    mode: "0644"
+    owner: apache
+    group: apache 
+  when: ansible_facts['os_family'] == "RedHat"
+  
+- name: "copuing index.html file to the Document Root with the appropriate owner, group and permissions on debian"
+  copy:
+    src: index.html
+    dest: "/var/www/html/index.html"
+    mode: "0644"
+    owner: www-data
+    group: www-data
+  when: ansible_facts['os_family'] == "Debian"
+  
+- name: "opening port 80 for http on redhat based systems permanent"
+  firewalld:
+    port: "80/tcp"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "opening port 80 for http on debian based systems permanent"
+  ufw:
+    port: "80"
+    proto: tcp
+    rule: allow
+  when: ansible_facts['os_family'] == "Debian"
+  

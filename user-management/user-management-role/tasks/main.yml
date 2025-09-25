@@ -1,0 +1,55 @@
+---
+# Playbook: Create groups, users, and apply security restrictions
+
+# Step 1: Create groups for each user
+- name: "Create a list of groups"
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ali
+    - mohamed
+    - ibrahim
+    - linus
+
+# Step 2: Create users, assign to their groups, and set default password
+- name: "Create a list of users with security restrictions"
+  ansible.builtin.user:
+    name: "{{ item }}"
+    group: "{{ item }}"          # Primary group = same as username
+    groups: wheel                # Add to wheel group (sudo access)
+    append: yes
+    shell: "/bin/bash"
+    create_home: yes
+    home: "/home/{{ item }}"
+    password: "{{ 'pa$$w0rd' | password_hash('sha512') }}"  # Secure password
+    update_password: on_create   # Only set password when user is first created
+  loop:
+    - ali
+    - mohamed
+    - ibrahim
+    - linus
+
+# Step 3: Apply password aging policy (using chage command)
+# -M 42 : max days before password expires
+# -m 3  : min days before password can be changed
+# -W 35 : warn user 35 days before expiry
+# -I 10 : disable account 10 days after expiry
+- name: "Set password aging policies"
+  ansible.builtin.command:
+    cmd: "chage -M 42 -m 3 -W 35 -I 10 {{ item }}"
+  loop:
+    - ali
+    - mohamed
+    - ibrahim
+    - linus
+
+# Step 4: Force users to reset password at first login
+- name: "Force users to change password on first login"
+  ansible.builtin.command:
+    cmd: "chage -d 0 {{ item }}"
+  loop:
+    - ali
+    - mohamed
+    - ibrahim
+    - linus

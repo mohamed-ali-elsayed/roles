@@ -1,0 +1,6 @@
+---
+- name: "playbook for apache-setup on redhat and debian based systems"
+  hosts: web_servers
+  become: yes
+  roles:
+    - apache-setup-role
