@@ -1,0 +1,6 @@
+---
+- name: "mariadb playbook"
+  hosts: db_servers
+  become: yes
+  roles:
+    - MariaDB-setup-role
