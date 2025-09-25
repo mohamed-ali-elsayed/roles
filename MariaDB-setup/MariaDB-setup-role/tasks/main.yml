@@ -1,0 +1,90 @@
+---
+- name: "Install MariaDB on RedHat"
+  yum:
+    name: mariadb-server
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "Install MariaDB on Debian"
+  apt:
+    name: mariadb-server
+    state: present
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: "Set MariaDB socket variable for RHEL"
+  set_fact:
+    mariadb_socket: "/var/lib/mysql/mysql.sock"
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "Set MariaDB socket variable for Debian"
+  set_fact:
+    mariadb_socket: "/run/mysqld/mysqld.sock"
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: "Ensure MariaDB is started and enabled"
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+# --- Root password handling ---
+- name: "Check if root can connect with password"
+  community.mysql.mysql_info:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+  register: root_login
+  ignore_errors: true
+
+- name: "Bootstrap root password via socket (only if password not set yet)"
+  community.mysql.mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mariadb_root_password }}"
+    login_unix_socket: "{{ mariadb_socket }}"
+    check_implicit_admin: true
+    state: present
+  when: root_login is failed
+
+# --- Database & users ---
+- name: "Create companydb database"
+  community.mysql.mysql_db:
+    name: companydb
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+
+- name: "Remove anonymous users"
+  community.mysql.mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+
+- name: "Create user1 with all privileges"
+  community.mysql.mysql_user:
+    name: bob
+    password: "{{ user1_password }}"
+    priv: "companydb.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+
+- name: "Create user2 with limited privileges"
+  community.mysql.mysql_user:
+    name: user2
+    password: "{{ user2_password }}"
+    priv: "companydb.*:SELECT,INSERT,UPDATE"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+
+- name: "Remove test database"
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
