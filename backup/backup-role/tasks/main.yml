@@ -1,0 +1,22 @@
+---
+- name: "Ensure backup directory exists"
+  file:
+    path: "{{ backup_dest }}"
+    state: directory
+    mode: '0755'
+
+- name: "Create compressed backups of important directories"
+  archive:
+    path: "{{ item }}"
+    dest: "{{ backup_dest }}/{{ item | basename }}-{{ inventory_hostname }}-{{ timestamp }}.tar.gz"
+    format: gz
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ backup_dirs }}"
+  register: backup_results
+
+- name: "Show backup results"
+  debug:
+    msg: "Backup created: {{ item.dest }}"
+  loop: "{{ backup_results.results }}"
