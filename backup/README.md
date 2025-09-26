@@ -13,7 +13,6 @@ ansible-playbook -i hosts.ini playbook.yml
 Automation with Cron
 Schedule the playbook to run automatically, for example every Thursday at 01:00 AM:
 ```
-```
 crontab -e
 ```
 0 1 * * 4 /usr/local/bin/ansible-playbook -i /root/hosts.ini /root/playbook.yml
