@@ -1,0 +1,6 @@
+backup_dirs:
+  - /etc
+  - /home
+  - /var
+backup_dest: "/backups"
+timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
